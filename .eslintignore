@@ -1,0 +1,4 @@
+**/node_modules/**
+db/migrations/migrate/*.js
+db/migrations/seed/*.js
+package.json

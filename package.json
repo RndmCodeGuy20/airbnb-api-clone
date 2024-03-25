@@ -1,5 +1,5 @@
 {
-	"name": "node-api-template",
+	"name": "airbnb-api-clone",
 	"version": "1.0.0",
 	"description": "api boilerplate for robust and scalable REST type arch",
 	"main": "src/index.js",
@@ -16,7 +16,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/RndmCodeGuy20/node-api-template.git"
+		"url": "git+https://github.com/RndmCodeGuy20/airbnb-api-clone.git"
 	},
 	"keywords": [
 		"api",
@@ -27,9 +27,9 @@
 	"author": "RndmCodeGuy20",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/RndmCodeGuy20/node-api-template/issues"
+		"url": "https://github.com/RndmCodeGuy20/airbnb-api-clone/issues"
 	},
-	"homepage": "https://github.com/RndmCodeGuy20/node-api-template#readme",
+	"homepage": "https://github.com/RndmCodeGuy20/airbnb-api-clone#readme",
 	"devDependencies": {
 		"@babel/cli": "^7.23.9",
 		"@babel/core": "^7.23.9",

@@ -1,5 +1,4 @@
 import { pkgConfig } from '#configs/index';
-import { consumeMessage } from '#helpers/index';
 
 /**
  * Get health
@@ -10,9 +9,6 @@ import { consumeMessage } from '#helpers/index';
  */
 export const getHealth = async (req, res, next) => {
   // await getPGConnection();
-  await consumeMessage('new-topic', (message) => {
-    console.log(message);
-  });
   try {
     res.jsend.success(
         {

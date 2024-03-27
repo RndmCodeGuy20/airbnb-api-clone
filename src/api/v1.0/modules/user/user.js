@@ -67,7 +67,6 @@ class UserService {
         );
       }
 
-      // TODO: generate email verification token and store in database
       const verificationToken = generateVerificationToken();
 
       const insertVerificationTokenQuery = `INSERT INTO data_auth_tokens (user_id, token)
@@ -85,8 +84,6 @@ class UserService {
             ERROR_CODES.UNKNOWN_ERROR,
         );
       }
-
-      // TODO: Send email verification email
 
       await sendEmail(
           body.email,

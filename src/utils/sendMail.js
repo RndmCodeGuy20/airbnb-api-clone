@@ -21,8 +21,7 @@ export const sendEmail = async (to, subject, message, attachment) => {
       attachments: attachment,
     };
 
-    const response = await transporter.sendMail(mailOptions);
-    return response;
+    await transporter.sendMail(mailOptions);
   } catch (error) {
     throw error;
   }

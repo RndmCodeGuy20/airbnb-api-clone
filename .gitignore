@@ -137,3 +137,6 @@ dist
 .idea/
 .vscode
 .vscode/settings.json
+
+# Database boilerplate
+db/playground/*.sql

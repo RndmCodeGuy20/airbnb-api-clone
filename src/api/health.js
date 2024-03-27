@@ -1,4 +1,5 @@
 import { pkgConfig } from '#configs/index';
+import { getPGConnection } from '#helpers/index';
 
 /**
  * Get health
@@ -8,7 +9,7 @@ import { pkgConfig } from '#configs/index';
  * @return {Promise<void>}
  */
 export const getHealth = async (req, res, next) => {
-  // await getPGConnection();
+  await getPGConnection();
   try {
     res.jsend.success(
         {

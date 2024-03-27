@@ -1,13 +1,9 @@
-import express, { Router } from 'express';
+import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import { envConfig, pkgConfig } from '#configs/index';
-import {
-  errorMiddleware,
-  morganMiddleware,
-  routeNotFound,
-} from '#middlewares/index';
+import { errorMiddleware, morganMiddleware } from '#middlewares/index';
 import apiRoutes from './api';
 import { jsend } from '#utils/index';
 
@@ -20,8 +16,8 @@ const corsOptions = {
 
 const app = express();
 
-const appRouter = new Router();
-appRouter.all('*', routeNotFound);
+// const appRouter = new Router();
+// appRouter.all('*', routeNotFound);
 
 app.use(helmet());
 app.use(cors(corsOptions));
@@ -31,7 +27,7 @@ app.use(cookieParser());
 // app.use(loggerMiddleware);
 app.use(morganMiddleware);
 app.use(jsend());
-app.use(appRouter);
+// app.use(appRouter);
 
 app.get('/favicon.ico', (req, res) => {
   res.sendFile('img.png', { root: 'public' });

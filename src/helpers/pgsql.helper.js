@@ -37,3 +37,5 @@ export const getPGConnection = async () => {
 };
 
 export const pgsqlQuery = util.promisify(pool.query).bind(pool);
+// export const pgsqlCommit = util.promisify(pool.commit).bind(pool);
+// export const pgsqlRollback = util.promisify(pool.rollback).bind(pool);

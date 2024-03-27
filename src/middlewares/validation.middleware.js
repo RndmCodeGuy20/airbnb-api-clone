@@ -26,7 +26,7 @@ export const validateSchema = (schema) => (req, res, next) => {
   const object = pick(req, Object.keys(validSchema));
   const { value, error } = Joi.compile(validSchema)
       .prefs({
-        errors: { label: 'key', wrap: { label: 'a' } },
+        errors: { label: 'key', wrap: { label: '`' } },
         abortEarly: false,
       })
       .validate(object);

@@ -38,12 +38,7 @@ router
     })
     .all(methodNotAllowed);
 
-router
-    .route('/auth/verify-email/:token')
-    .get((req, res) => {
-      res.send('Verify Email');
-    })
-    .all(methodNotAllowed);
+router.route('/auth/verify/:token').get(api.verify).all(methodNotAllowed);
 
 router
     .route('/auth/resend-verification-email')

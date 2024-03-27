@@ -3,15 +3,19 @@ import Joi from 'joi';
 export const schema = {
   register: {
     body: Joi.object({
-      fullName: Joi.string()
-          .required()
-          .label('Full Name')
-          .pattern(new RegExp("^[A-Z a-z,.'-]+$")),
-      username: Joi.string()
-          .required()
-          .label('Username')
-          .pattern(new RegExp('^[a-z0-9]+$')),
+      // fullName: Joi.string()
+      //     .required()
+      //     .label('Full Name')
+      //     .pattern(new RegExp("^[A-Z a-z,.'-]+$")),
+      // username: Joi.string()
+      //     .required()
+      //     .label('Username')
+      //     .pattern(new RegExp('^[a-z0-9]+$')),
       email: Joi.string().required().label('Email').email(),
+      role: Joi.string()
+          .required()
+          .label('Role')
+          .valid('user', 'admin', 'moderator'),
       password: Joi.string()
           .required()
           .label('Password')

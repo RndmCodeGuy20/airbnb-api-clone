@@ -24,6 +24,10 @@ const {
   REDIS_PORT,
   REDIS_PASSWORD,
   JWT_SECRET,
+  EMAIL_HOST,
+  EMAIL_PORT,
+  EMAIL_USER,
+  EMAIL_PASSWORD,
 } = process.env;
 
 export const envConfig = {
@@ -52,4 +56,10 @@ export const envConfig = {
     REDIS_PASSWORD: REDIS_PASSWORD,
   },
   JWT_SECRET_KEY: JWT_SECRET,
+  EMAIL: {
+    EMAIL_HOST: EMAIL_HOST,
+    EMAIL_PORT: EMAIL_PORT,
+    EMAIL_USER: EMAIL_USER,
+    EMAIL_PASSWORD: EMAIL_PASSWORD,
+  },
 };

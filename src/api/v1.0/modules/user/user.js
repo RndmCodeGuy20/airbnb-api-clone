@@ -2,11 +2,7 @@ import { pgsqlQuery } from '#helpers/index';
 import { ERROR_CODES } from '#constants/error-codes.constant';
 import { UserApiError } from './error';
 import { StatusCodes } from 'http-status-codes';
-import {
-  generateHash,
-  generateVerificationToken,
-  sendEmail,
-} from '#utils/index';
+import { generateHash, generateVerificationToken, mailer } from '#utils/index';
 
 /**
  * @class UserService
@@ -85,17 +81,7 @@ class UserService {
         );
       }
 
-      await sendEmail(
-          body.email,
-          'Welcome Back!',
-          `Hello ${body.email},
-										Please click on the link to verify your email:
-										<a href="http://localhost:5500/api/v1.0/auth/verify/${verificationToken}">
-										Verify Email
-										</a>
-										${verificationToken}`,
-          '',
-      );
+      await mailer.sendEmailVerificationToken(body.email, verificationToken);
 
       return {
         message: 'Verification email sent successfully',
@@ -112,7 +98,7 @@ class UserService {
 	 */
   async verify(token) {
     try {
-      const verifyTokenQuery = `SELECT *
+      const verifyTokenQuery = `SELECT user_id
 																FROM data_auth_tokens
 																WHERE token = $1`;
 
@@ -122,7 +108,7 @@ class UserService {
         throw new UserApiError(
             'Invalid token',
             StatusCodes.BAD_REQUEST,
-            ERROR_CODES.INVALID_TOKEN,
+            ERROR_CODES.INVALID,
         );
       }
 
@@ -151,6 +137,21 @@ class UserService {
       return {
         message: 'User verified successfully',
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+	 *
+	 * @param {{
+	 *   email: string,
+	 *   password: string
+	 * }} body
+	 * @return {Promise<void>}
+	 */
+  async login(body) {
+    try {
     } catch (error) {
       throw error;
     }

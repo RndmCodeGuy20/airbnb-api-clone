@@ -38,7 +38,7 @@ export const mailer = {
 <body>
 	<h1>Email Verification</h1>
 	<p>Click on the link below to verify your email</p>
-	<a href="http://localhost:5500/api/v1.0/auth/verify${token}">Verify Email</a>
+	<a href="http://localhost:5500/api/v1.0/auth/verify/${token}">Verify Email</a>
 </body>
 </html>`;
       mailOptions.to = email;

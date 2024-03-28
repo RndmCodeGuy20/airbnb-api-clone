@@ -30,10 +30,10 @@ export const schema = {
   login: {
     body: Joi.object({
       email: Joi.string().required().label('Email').email(),
-      username: Joi.string()
-          .required()
-          .label('Username')
-          .pattern(new RegExp('^[a-z0-9]+$')),
+      // username: Joi.string()
+      //     .required()
+      //     .label('Username')
+      //     .pattern(new RegExp('^[a-z0-9]+$')),
       password: Joi.string().required().label('Password'),
     }).or('email', 'username'),
   },

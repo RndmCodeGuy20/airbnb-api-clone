@@ -14,6 +14,7 @@ export const errorMiddleware = (error, req, res) => {
     res.jsend.fail(
         error.message,
         {
+          info: error.info,
           errorName: error.name,
           ...(envConfig.ENV === ENVIRONMENTS.DEVELOPMENT && {
             details: error.reason,

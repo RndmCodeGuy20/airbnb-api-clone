@@ -10,4 +10,8 @@ export const controller = {
     const response = await userService.verify(req.params.token);
     res.jsend.success(response, 'VERIFICATION_SUCCESSFUL');
   }),
+  login: catchAsync(async (req, res) => {
+    const response = await userService.login(req.body);
+    res.jsend.success(response, 'LOGIN_SUCCESSFUL');
+  }),
 };

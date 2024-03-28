@@ -11,12 +11,14 @@ class UserApiError extends Error {
   /**
 	 * Creates an instance of BuyerApiError.
 	 * @param {string} message - Error message
+	 * @param {string} info - Error info
 	 * @param {number} httpStatus - HTTP status code
 	 * @param {string} errorCode - Error code
 	 */
-  constructor(message, httpStatus, errorCode) {
+  constructor(message, info, httpStatus, errorCode) {
     super(message);
     this.name = 'UserApiError';
+    this.info = info;
     this.status = httpStatus;
     this.errorCode = errorCode;
   }

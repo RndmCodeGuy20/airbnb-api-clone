@@ -12,9 +12,7 @@ router
 
 router
     .route('/auth/login')
-    .post(validateSchema(schema.login), (req, res) => {
-      res.send('Login');
-    })
+    .post(validateSchema(schema.login), api.login)
     .all(methodNotAllowed);
 
 router

@@ -6,7 +6,7 @@
 	"scripts": {
 		"start": "cross-env NODE_ENV=production npx babel-node src/index.js",
 		"dev": "cross-env NODE_ENV=development nodemon --exec npx babel-node src/index.js",
-		"test": "jest",
+		"test": "jest --watchAll --verbose --detectOpenHandles",
 		"prepare": "husky",
 		"commitlint": "commitlint --edit",
 		"commit": "cz",
@@ -42,8 +42,11 @@
 		"eslint": "^8.56.0",
 		"eslint-config-google": "^0.14.0",
 		"husky": "^9.0.10",
+		"jest": "^29.7.0",
 		"lint-staged": "^15.2.1",
-		"prettier": "^3.2.4"
+		"mocha": "^10.4.0",
+		"prettier": "^3.2.4",
+		"supertest": "^6.3.4"
 	},
 	"dependencies": {
 		"@prisma/client": "^5.10.2",
@@ -79,6 +82,7 @@
 		"#constants/*": "./src/constants/*.js",
 		"#helpers/*": "./src/helpers/*.js",
 		"#middlewares/*": "./src/middlewares/*.js",
-		"#utils/*": "./src/utils/*.js"
+		"#utils/*": "./src/utils/*.js",
+		"#app/*": "./src/app.js"
 	}
 }

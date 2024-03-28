@@ -2,7 +2,15 @@ import { pgsqlQuery } from '#helpers/index';
 import { ERROR_CODES } from '#constants/error-codes.constant';
 import { UserApiError } from './error';
 import { StatusCodes } from 'http-status-codes';
-import { generateHash, generateVerificationToken, mailer } from '#utils/index';
+import {
+  compareHash,
+  generateHash,
+  generateToken,
+  generateVerificationToken,
+  mailer,
+} from '#utils/index';
+import { envConfig } from '#configs/env.config';
+import { ENVIRONMENTS } from '#constants/environments.constant';
 
 /**
  * @class UserService
@@ -30,6 +38,7 @@ class UserService {
 
       if (userAlreadyExistsResult.rows.length > 0) {
         throw new UserApiError(
+            'USER_ALREADY_EXISTS',
             'User already exists',
             StatusCodes.CONFLICT,
             ERROR_CODES.DUPLICATE,
@@ -57,6 +66,7 @@ class UserService {
 
       if (!insertUserResult.rows) {
         throw new UserApiError(
+            'REGISTRATION_FAILED',
             'User registration failed',
             StatusCodes.INTERNAL_SERVER_ERROR,
             ERROR_CODES.UNKNOWN_ERROR,
@@ -75,7 +85,8 @@ class UserService {
 
       if (!insertVerificationTokenResponse.rows) {
         throw new UserApiError(
-            'User registration failed',
+            'VERIFICATION_TOKEN_GENERATION_FAILED',
+            'Verification token generation failed',
             StatusCodes.INTERNAL_SERVER_ERROR,
             ERROR_CODES.UNKNOWN_ERROR,
         );
@@ -84,7 +95,9 @@ class UserService {
       await mailer.sendEmailVerificationToken(body.email, verificationToken);
 
       return {
-        message: 'Verification email sent successfully',
+        verificationToken:
+					envConfig.ENV === ENVIRONMENTS.DEVELOPMENT ? verificationToken : null,
+        info: 'Verification email sent successfully',
       };
     } catch (error) {
       throw error;
@@ -106,6 +119,7 @@ class UserService {
 
       if (verifyTokenResult.rows.length === 0) {
         throw new UserApiError(
+            'INVALID_TOKEN',
             'Invalid token',
             StatusCodes.BAD_REQUEST,
             ERROR_CODES.INVALID,
@@ -122,6 +136,7 @@ class UserService {
 
       if (!updateUserResult.rows) {
         throw new UserApiError(
+            'USER_VERIFICATION_FAILED',
             'User verification failed',
             StatusCodes.INTERNAL_SERVER_ERROR,
             ERROR_CODES.UNKNOWN_ERROR,
@@ -135,7 +150,7 @@ class UserService {
       await pgsqlQuery(deleteTokenQuery, [token]);
 
       return {
-        message: 'User verified successfully',
+        info: 'User verified successfully',
       };
     } catch (error) {
       throw error;
@@ -152,6 +167,54 @@ class UserService {
 	 */
   async login(body) {
     try {
+      // Check if user exists
+      const getUserQuery = `SELECT *
+														FROM core_users
+														WHERE email = $1`;
+
+      const getUserResult = await pgsqlQuery(getUserQuery, [body.email]);
+
+      if (getUserResult.rows.length === 0) {
+        throw new UserApiError(
+            'USER_NOT_FOUND',
+            'User not found',
+            StatusCodes.BAD_REQUEST,
+            ERROR_CODES.INVALID,
+        );
+      }
+
+      const user = getUserResult.rows[0];
+
+      // Check if user is verified
+      if (user.verification_status !== 'verified') {
+        throw new UserApiError(
+            'USER_NOT_VERIFIED',
+            'User is not verified',
+            StatusCodes.BAD_REQUEST,
+            ERROR_CODES.INVALID,
+        );
+      }
+
+      // Compare password
+      const isPasswordValid = await compareHash(body.password, user.password);
+
+      if (!isPasswordValid) {
+        throw new UserApiError(
+            'INVALID_CREDENTIALS',
+            'Invalid credentials',
+            StatusCodes.BAD_REQUEST,
+            ERROR_CODES.INVALID,
+        );
+      }
+
+      // Generate JWT token
+      const token = generateToken({
+        userId: user.user_id,
+        email: user.email,
+        role: user.role_id,
+      });
+
+      return { token };
     } catch (error) {
       throw error;
     }

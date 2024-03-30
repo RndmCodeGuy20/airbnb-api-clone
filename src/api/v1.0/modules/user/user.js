@@ -92,7 +92,7 @@ class UserService {
         );
       }
 
-      await mailer.sendEmailVerificationToken(body.email, verificationToken);
+      mailer.sendEmailVerificationToken(body.email, verificationToken);
 
       return {
         verificationToken:

@@ -25,7 +25,7 @@ const mailOptions = {
  * @return {Promise<void>}
  */
 export const mailer = {
-  sendEmailVerificationToken: async (email, token) => {
+  sendEmailVerificationToken: (email, token) => {
     try {
       const message = `<!DOCTYPE html>
 <html lang="en">
@@ -44,7 +44,9 @@ export const mailer = {
       mailOptions.to = email;
       mailOptions.subject = 'Email Verification';
       mailOptions.html = message;
-      await transporter.sendMail(mailOptions);
+      transporter.sendMail(mailOptions).catch((error) => {
+        throw error;
+      });
     } catch (error) {
       throw error;
     }

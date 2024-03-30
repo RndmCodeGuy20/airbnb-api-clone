@@ -56,10 +56,25 @@ export const schema = {
     body: Joi.object({
       email: Joi.string().required().label('Email').email(),
       username: Joi.string()
-          .required()
           .label('Username')
           .pattern(new RegExp('^[a-z0-9]+$')),
     }).or('email', 'username'),
+  },
+
+  resetPassword: {
+    params: Joi.object({
+      token: Joi.string().required().label('Token'),
+    }),
+    body: Joi.object({
+      password: Joi.string()
+          .required()
+          .label('Password')
+          .pattern(
+              new RegExp(
+                  '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})',
+              ),
+          ),
+    }),
   },
 
   refresh: {

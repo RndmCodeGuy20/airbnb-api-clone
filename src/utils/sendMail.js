@@ -51,4 +51,30 @@ export const mailer = {
       throw error;
     }
   },
+  sendPasswordResetToken: (email, token) => {
+    try {
+      const message = `<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Password Reset</title>
+</head>
+<body>
+	<h1>Password Reset</h1>
+	<p>Click on the link below to reset your password</p>
+	<a href="http://localhost:5500/api/v1.0/auth/reset-password/${token}">Reset Password</a>
+</body>
+</html>`;
+      mailOptions.to = email;
+      mailOptions.subject = 'Password Reset';
+      mailOptions.html = message;
+      transporter.sendMail(mailOptions).catch((error) => {
+        throw error;
+      });
+    } catch (error) {
+      throw error;
+    }
+  },
 };

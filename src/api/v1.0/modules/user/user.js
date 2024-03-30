@@ -309,6 +309,99 @@ class UserService {
       throw error;
     }
   }
+
+  /**
+	 * Forgot password
+	 * @param {{
+	 *   email: string
+	 * }} body
+	 * @return {Promise<{token: (string|null), info: string}>}
+	 */
+  async forgotPassword(body) {
+    try {
+      const getUserQuery = `SELECT *
+														FROM core_users
+														WHERE email = $1`;
+
+      const getUserResult = await pgsqlQuery(getUserQuery, [body.email]);
+
+      if (getUserResult.rows.length === 0) {
+        throw new UserApiError(
+            'USER_NOT_FOUND',
+            'User not found',
+            StatusCodes.BAD_REQUEST,
+            ERROR_CODES.INVALID,
+        );
+      }
+
+      const user = getUserResult.rows[0];
+
+      const resetToken = generateVerificationToken();
+
+      const insertResetTokenQuery = `INSERT INTO data_captcha_tokens (user_id, token)
+																		 VALUES ($1, $2)`;
+
+      await pgsqlQuery(insertResetTokenQuery, [user.user_id, resetToken]);
+
+      mailer.sendPasswordResetToken(body.email, resetToken);
+
+      return {
+        token: envConfig.ENV === ENVIRONMENTS.DEVELOPMENT ? resetToken : null,
+        info: 'Password reset email sent successfully',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+	 *
+	 * @param {string} token
+	 * @param {{
+	 *   password: string
+	 * }} body
+	 * @return {Promise<{info: string}>}
+	 */
+  async resetPassword(token, body) {
+    try {
+      const verifyTokenQuery = `SELECT *
+																FROM data_captcha_tokens
+																WHERE token = $1`;
+
+      const verifyTokenResult = await pgsqlQuery(verifyTokenQuery, [token]);
+
+      if (verifyTokenResult.rows.length === 0) {
+        throw new UserApiError(
+            'INVALID_TOKEN',
+            'Invalid token',
+            StatusCodes.BAD_REQUEST,
+            ERROR_CODES.INVALID,
+        );
+      }
+
+      const userId = verifyTokenResult.rows[0].user_id;
+
+      const hashedPassword = await generateHash(body.password);
+
+      const updatePasswordQuery = `UPDATE core_users
+																	 SET password = $1
+																	 WHERE user_id = $2`;
+
+      await pgsqlQuery(updatePasswordQuery, [hashedPassword, userId]);
+
+      const deleteTokenQuery = `DELETE
+																FROM data_captcha_tokens
+																WHERE token = $1`;
+
+      await pgsqlQuery(deleteTokenQuery, [token]);
+
+      return {
+        info: 'Password reset successfully',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export const userService = new UserService();

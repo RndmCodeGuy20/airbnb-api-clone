@@ -30,21 +30,20 @@ router
 
 router
     .route('/auth/forgot-password')
-    .post((req, res) => {
-      res.send('Forgot Password');
-    })
+    .post(validateSchema(schema.forgotPassword), api.forgotPassword)
     .all(methodNotAllowed);
 
 router
     .route('/auth/reset-password/:token')
-    .post((req, res) => {
-      res.send('Forgot Password');
-    })
+    .post(validateSchema(schema.resetPassword), api.resetPassword)
     .all(methodNotAllowed);
 
 router.route('/auth/refresh').post(api.refreshToken).all(methodNotAllowed);
 
-router.route('/user/protected').get(validateUser, api.protectedRoute);
+router
+    .route('/user/protected')
+    .get(validateUser, api.protectedRoute)
+    .all(methodNotAllowed);
 
 router
     .route('/auth/logout')

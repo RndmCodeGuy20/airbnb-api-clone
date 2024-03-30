@@ -1,7 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import { verifyToken } from '#utils/index';
 import { ERROR_CODES } from '#constants/index';
-import { logger } from '#helpers/logger.helper';
 
 /**
  * Authentication Middleware
@@ -47,7 +46,6 @@ export const validateUser = (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
     const tokenData = verifyToken(token);
-    logger.debug(tokenData);
     res.locals.user = tokenData.data;
 
     return next();

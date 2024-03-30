@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import { controller as api } from './controller';
-import { methodNotAllowed, validateSchema } from '#middlewares/index';
+import {
+  methodNotAllowed,
+  validateSchema,
+  validateUser,
+} from '#middlewares/index';
 import { schema } from './schema';
 
 const router = new Router();
@@ -10,16 +14,18 @@ router
     .post(validateSchema(schema.register), api.register)
     .all(methodNotAllowed);
 
+router.route('/auth/verify/:token').get(api.verify).all(methodNotAllowed);
+
 router
-    .route('/auth/login')
-    .post(validateSchema(schema.login), api.login)
+    .route('/auth/resend-verification-email')
+    .post((req, res) => {
+      res.send('Resend Verification Email');
+    })
     .all(methodNotAllowed);
 
 router
-    .route('/auth/login/otp')
-    .post((req, res) => {
-      res.send('Login OTP');
-    })
+    .route('/auth/login')
+    .post(validateSchema(schema.login), api.login)
     .all(methodNotAllowed);
 
 router
@@ -36,14 +42,9 @@ router
     })
     .all(methodNotAllowed);
 
-router.route('/auth/verify/:token').get(api.verify).all(methodNotAllowed);
+router.route('/auth/refresh').post(api.refreshToken).all(methodNotAllowed);
 
-router
-    .route('/auth/resend-verification-email')
-    .post((req, res) => {
-      res.send('Resend Verification Email');
-    })
-    .all(methodNotAllowed);
+router.route('/user/protected').get(validateUser, api.protectedRoute);
 
 router
     .route('/auth/logout')

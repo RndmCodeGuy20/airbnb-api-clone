@@ -20,4 +20,24 @@ export const controller = {
     });
     res.jsend.success(response.token, 'LOGIN_SUCCESSFUL');
   }),
+  refreshToken: catchAsync(async (req, res) => {
+    const { refreshToken, token } = await userService.refreshToken(
+        req.cookies.refreshToken,
+    );
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+    });
+    res.jsend.success(
+        {
+          token: token,
+        },
+        'TOKEN_REFRESHED',
+    );
+  }),
+  protectedRoute: catchAsync(async (req, res) => {
+    res.jsend.success(req.user, 'PROTECTED_ROUTE');
+  }),
 };

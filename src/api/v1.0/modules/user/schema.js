@@ -61,4 +61,10 @@ export const schema = {
           .pattern(new RegExp('^[a-z0-9]+$')),
     }).or('email', 'username'),
   },
+
+  refresh: {
+    body: Joi.object({
+      refreshToken: Joi.string().required().label('Refresh Token'),
+    }),
+  },
 };

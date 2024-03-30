@@ -9,6 +9,7 @@ import {
   generateToken,
   generateVerificationToken,
   mailer,
+  verifyRefreshToken,
 } from '#utils/index';
 import { envConfig } from '#configs/env.config';
 import { ENVIRONMENTS } from '#constants/environments.constant';
@@ -231,14 +232,15 @@ class UserService {
       });
 
       // update refresh token in db
-      const updateRefreshTokenQuery = `UPDATE core_auth_tokens
-																			 SET token = $1
-																			 WHERE user_id = $2`;
+      const updateRefreshTokenQuery = `
+				INSERT INTO core_auth_tokens (token, user_id)
+				VALUES ($1, $2) ON CONFLICT (user_id)
+																							DO
+				UPDATE SET token = $1`;
 
       await pgsqlQuery(updateRefreshTokenQuery, [refreshToken, user.user_id]);
 
       // update last login time
-
       const updateLastLoginQuery = `UPDATE core_users
 																		SET last_logged_in = NOW()
 																		WHERE user_id = $1`;
@@ -246,6 +248,63 @@ class UserService {
       await pgsqlQuery(updateLastLoginQuery, [user.user_id]);
 
       return { token, refreshToken };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+	 * Refresh token
+	 * @param {string} token
+	 * @return {Promise<{token: (string), refreshToken: (string)}>}
+	 */
+  async refreshToken(token) {
+    try {
+      const verifyRefreshTokenQuery = `SELECT *
+																			 FROM core_auth_tokens
+																			 WHERE token = $1`;
+
+      const verifyRefreshTokenResult = await pgsqlQuery(
+          verifyRefreshTokenQuery,
+          [token],
+      );
+
+      if (
+        verifyRefreshTokenResult.rows.length === 0 ||
+				!verifyRefreshToken(token)
+      ) {
+        throw new UserApiError(
+            'INVALID_REFRESH_TOKEN',
+            'Invalid refresh token',
+            StatusCodes.UNAUTHORIZED,
+            ERROR_CODES.UNAUTHORIZED,
+        );
+      }
+
+      const user = verifyRefreshTokenResult.rows[0];
+
+      const newToken = generateToken({
+        userId: user.user_id,
+        email: user.email,
+        role: user.role_id,
+      });
+
+      const newRefreshToken = generateRefreshToken({
+        userId: user.user_id,
+        email: user.email,
+        role: user.role_id,
+      });
+
+      const updateRefreshTokenQuery = `UPDATE core_auth_tokens
+																			 SET token = $1
+																			 WHERE user_id = $2`;
+
+      await pgsqlQuery(updateRefreshTokenQuery, [
+        newRefreshToken,
+        user.user_id,
+      ]);
+
+      return { token: newToken, refreshToken: newRefreshToken };
     } catch (error) {
       throw error;
     }

@@ -10,7 +10,7 @@ export const generateToken = (tokenData) => {
       },
       envConfig.JWT_SECRET_KEY,
       {
-        expiresIn: '90d',
+        expiresIn: tokenConfig.TOKEN_LIFE,
       },
   );
 };
@@ -30,15 +30,16 @@ export const generateRefreshToken = (tokenData) => {
 export const verifyToken = (token) => {
   try {
     return jwt.verify(token, envConfig.JWT_SECRET_KEY);
-  } catch (e) {
-    if (e.name === 'TokenExpiredError') {
-      e.name = 'User Session Expired';
-      e.status = 401;
-      e.errorCode = ERROR_CODES.UNAUTHENTICATED;
-      throw e;
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      error.info = 'TOKEN_EXPIRED';
+      error.name = 'User Session Expired';
+      error.status = 401;
+      error.errorCode = ERROR_CODES.UNAUTHENTICATED;
+      throw error;
     }
 
-    throw e;
+    throw error;
   }
 };
 
@@ -47,21 +48,22 @@ export const verifyTokenWithoutExpiration = (token) => {
     return jwt.verify(token, envConfig.JWT_SECRET_KEY, {
       ignoreExpiration: true,
     });
-  } catch (err) {
-    throw err;
+  } catch (error) {
+    throw error;
   }
 };
 
 export const verifyRefreshToken = (token) => {
   try {
     return jwt.verify(token, envConfig.JWT_SECRET_KEY);
-  } catch (err) {
-    if (err.name === 'TokenExpiredError') {
-      err.message = 'Refresh Token Expired';
-      err.status = 403;
-      err.errorCode = ERROR_CODES.UNAUTHORIZED;
-      throw err;
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      error.info = 'REFRESH_TOKEN_EXPIRED';
+      error.message = 'Refresh Token Expired';
+      error.status = 403;
+      error.errorCode = ERROR_CODES.UNAUTHORIZED;
+      throw error;
     }
-    throw err;
+    throw error;
   }
 };

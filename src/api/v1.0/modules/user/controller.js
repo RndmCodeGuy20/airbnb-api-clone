@@ -12,6 +12,12 @@ export const controller = {
   }),
   login: catchAsync(async (req, res) => {
     const response = await userService.login(req.body);
-    res.jsend.success(response, 'LOGIN_SUCCESSFUL');
+    res.cookie('refreshToken', response.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+    });
+    res.jsend.success(response.token, 'LOGIN_SUCCESSFUL');
   }),
 };

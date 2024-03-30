@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import {
   compareHash,
   generateHash,
+  generateRefreshToken,
   generateToken,
   generateVerificationToken,
   mailer,
@@ -75,7 +76,7 @@ class UserService {
 
       const verificationToken = generateVerificationToken();
 
-      const insertVerificationTokenQuery = `INSERT INTO data_auth_tokens (user_id, token)
+      const insertVerificationTokenQuery = `INSERT INTO data_captcha_tokens (user_id, token)
 																						VALUES ($1, $2)`;
 
       const insertVerificationTokenResponse = await pgsqlQuery(
@@ -107,12 +108,12 @@ class UserService {
   /**
 	 *
 	 * @param {string} token
-	 * @return {Promise<{message: string}>}
+	 * @return {Promise<{info: string}>}
 	 */
   async verify(token) {
     try {
       const verifyTokenQuery = `SELECT user_id
-																FROM data_auth_tokens
+																FROM data_captcha_tokens
 																WHERE token = $1`;
 
       const verifyTokenResult = await pgsqlQuery(verifyTokenQuery, [token]);
@@ -144,7 +145,7 @@ class UserService {
       }
 
       const deleteTokenQuery = `DELETE
-																FROM data_auth_tokens
+																FROM data_captcha_tokens
 																WHERE token = $1`;
 
       await pgsqlQuery(deleteTokenQuery, [token]);
@@ -163,7 +164,7 @@ class UserService {
 	 *   email: string,
 	 *   password: string
 	 * }} body
-	 * @return {Promise<void>}
+	 * @return {Promise<*>}
 	 */
   async login(body) {
     try {
@@ -183,6 +184,15 @@ class UserService {
         );
       }
 
+      /**
+			 * @type {{
+			 *  user_id: string,
+			 *  email: string,
+			 *  password: string,
+			 *  verification_status: string,
+			 *  role_id: string
+			 *  }}
+			 */
       const user = getUserResult.rows[0];
 
       // Check if user is verified
@@ -190,8 +200,8 @@ class UserService {
         throw new UserApiError(
             'USER_NOT_VERIFIED',
             'User is not verified',
-            StatusCodes.BAD_REQUEST,
-            ERROR_CODES.INVALID,
+            StatusCodes.UNAUTHORIZED,
+            ERROR_CODES.UNAUTHORIZED,
         );
       }
 
@@ -214,7 +224,28 @@ class UserService {
         role: user.role_id,
       });
 
-      return { token };
+      const refreshToken = generateRefreshToken({
+        userId: user.user_id,
+        email: user.email,
+        role: user.role_id,
+      });
+
+      // update refresh token in db
+      const updateRefreshTokenQuery = `UPDATE core_auth_tokens
+																			 SET token = $1
+																			 WHERE user_id = $2`;
+
+      await pgsqlQuery(updateRefreshTokenQuery, [refreshToken, user.user_id]);
+
+      // update last login time
+
+      const updateLastLoginQuery = `UPDATE core_users
+																		SET last_logged_in = NOW()
+																		WHERE user_id = $1`;
+
+      await pgsqlQuery(updateLastLoginQuery, [user.user_id]);
+
+      return { token, refreshToken };
     } catch (error) {
       throw error;
     }

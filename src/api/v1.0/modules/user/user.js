@@ -1,4 +1,4 @@
-import { pgsqlQuery } from '#helpers/index';
+import { logger, pgsqlQuery } from '#helpers/index';
 import { ERROR_CODES } from '#constants/error-codes.constant';
 import { UserApiError } from './error';
 import { StatusCodes } from 'http-status-codes';
@@ -397,6 +397,90 @@ class UserService {
 
       return {
         info: 'Password reset successfully',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+	 * Get user profile
+	 * @param {{
+	 *   userId: string
+	 * }} user
+	 * @return {Promise<{user: *}>}
+	 */
+  async getProfile(user) {
+    try {
+      const getUserQuery = `SELECT *
+														FROM data_profiles
+														WHERE user_id = $1`;
+
+      const getUserResult = await pgsqlQuery(getUserQuery, [user.userId]);
+
+      if (getUserResult.rows.length === 0) {
+        throw new UserApiError(
+            'PROFILE_NOT_FOUND',
+            'User not found',
+            StatusCodes.BAD_REQUEST,
+            ERROR_CODES.INVALID,
+        );
+      }
+
+      return {
+        user: getUserResult.rows[0],
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+	 * Update profile
+	 * @param {string} userId
+	 * @param {{
+	 * fullName: string,
+	 * bio: string,
+	 * profilePicture: string,
+	 * location: string,
+	 * addressLine1: string,
+	 * addressLine2: string
+	 * }} body
+	 * @return {Promise<{
+	 *   info: string
+	 * }>}
+	 */
+  async updateProfile(userId, body) {
+    try {
+      logger.debug(userId);
+      const updateProfileQuery = `INSERT INTO data_profiles (full_name, bio,
+																														 profile_picture, location, address_line_1,
+																														 address_line_2, user_id)
+																	VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (user_id)
+																	DO
+			UPDATE SET full_name = $1, bio = $2, profile_picture = $3, location = $4, address_line_1 = $5, address_line_2 = $6`;
+
+      const updateProfileQueryResult = await pgsqlQuery(updateProfileQuery, [
+        body.fullName,
+        body.bio,
+        body.profilePicture,
+        body.location,
+        body.addressLine1,
+        body.addressLine2,
+        userId,
+      ]);
+
+      if (!updateProfileQueryResult.rows) {
+        throw new UserApiError(
+            'PROFILE_UPDATE_FAILED',
+            'Profile update failed',
+            StatusCodes.INTERNAL_SERVER_ERROR,
+            ERROR_CODES.UNKNOWN_ERROR,
+        );
+      }
+
+      return {
+        info: 'Profile updated successfully',
       };
     } catch (error) {
       throw error;

@@ -53,20 +53,9 @@ router
     .all(methodNotAllowed);
 
 router
-    .route('/auth/refresh-token')
-    .post((req, res) => {
-      res.send('Refresh Token');
-    })
-    .all(methodNotAllowed);
-
-router
-    .route('auth/profile')
-    .get((req, res) => {
-      res.send('Profile');
-    })
-    .patch((req, res) => {
-      res.send('Update Profile');
-    })
+    .route('/user/profile')
+    .get(validateUser, api.getProfile)
+    .patch(validateUser, validateSchema(schema.updateProfile), api.updateProfile)
     .all(methodNotAllowed);
 
 module.exports = router;

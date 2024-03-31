@@ -82,4 +82,23 @@ export const schema = {
       refreshToken: Joi.string().required().label('Refresh Token'),
     }),
   },
+
+  updateProfile: {
+    body: Joi.object({
+      fullName: Joi.string()
+          .required()
+          .label('Full Name')
+          .pattern(new RegExp("^[A-Z a-z,.'-]+$")),
+      bio: Joi.string().label('Bio'),
+      profilePicture: Joi.string().label('Profile Picture'),
+      location: Joi.string().label('Location'),
+      addressLine1: Joi.string()
+          .required()
+          .label('Address Line 1')
+          .pattern(new RegExp('^[a-zA-Z0-9, ]+$')),
+      addressLine2: Joi.string()
+          .label('Address Line 2')
+          .pattern(new RegExp('^[a-zA-Z0-9, ]+$')),
+    }),
+  },
 };

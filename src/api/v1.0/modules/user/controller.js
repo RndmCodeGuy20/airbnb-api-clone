@@ -7,10 +7,12 @@ export const controller = {
     const response = await userService.register(req.body);
     res.jsend.success(response, 'REGISTRATION_SUCCESSFUL');
   }),
+
   verify: catchAsync(async (req, res) => {
     const response = await userService.verify(req.params.token);
     res.jsend.success(response, 'VERIFICATION_SUCCESSFUL');
   }),
+
   login: catchAsync(async (req, res) => {
     const response = await userService.login(req.body);
     res.cookie('refreshToken', response.refreshToken, {
@@ -21,16 +23,15 @@ export const controller = {
     });
     res.jsend.success(response.token, 'LOGIN_SUCCESSFUL');
   }),
+
   refreshToken: catchAsync(async (req, res) => {
     const { refreshToken, token } = await userService.refreshToken(
         req.cookies.refreshToken,
     );
-
     if (!refreshToken) {
       res.clearCookie('refreshToken');
       res.jsend.fail('REFRESH_TOKEN_EXPIRED', null, ERROR_CODES.INVALID);
     }
-
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
@@ -44,10 +45,12 @@ export const controller = {
         'TOKEN_REFRESHED',
     );
   }),
+
   forgotPassword: catchAsync(async (req, res) => {
     const response = await userService.forgotPassword(req.body);
     res.jsend.success(response, 'PASSWORD_RESET_EMAIL_SENT');
   }),
+
   resetPassword: catchAsync(async (req, res) => {
     const response = await userService.resetPassword(
         req.params.token,
@@ -55,6 +58,20 @@ export const controller = {
     );
     res.jsend.success(response, 'PASSWORD_RESET_SUCCESSFUL');
   }),
+
+  getProfile: catchAsync(async (req, res) => {
+    const response = await userService.getProfile(res.locals.user);
+    res.jsend.success(response, 'PROFILE_FETCHED');
+  }),
+
+  updateProfile: catchAsync(async (req, res) => {
+    const response = await userService.updateProfile(
+        res.locals.user.userId,
+        req.body,
+    );
+    res.jsend.success(response, 'PROFILE_UPDATED');
+  }),
+
   protectedRoute: catchAsync(async (req, res) => {
     res.jsend.success(req.user, 'PROTECTED_ROUTE');
   }),

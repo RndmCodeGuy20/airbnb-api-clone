@@ -454,11 +454,13 @@ class UserService {
     try {
       logger.debug(userId);
       const updateProfileQuery = `INSERT INTO data_profiles (full_name, bio,
-																														 profile_picture, location, address_line_1,
-																														 address_line_2, user_id)
-																	VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (user_id)
+																		profile_picture, location, address_line_1,
+																		address_line_2, user_id)
+				 VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (user_id)
 																	DO
-			UPDATE SET full_name = $1, bio = $2, profile_picture = $3, location = $4, address_line_1 = $5, address_line_2 = $6`;
+				UPDATE SET
+					full_name = $1, bio = $2, profile_picture = $3,
+					location = $4, address_line_1 = $5, address_line_2 = $6`;
 
       const updateProfileQueryResult = await pgsqlQuery(updateProfileQuery, [
         body.fullName,

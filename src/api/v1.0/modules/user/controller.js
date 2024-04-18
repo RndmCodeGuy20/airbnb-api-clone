@@ -21,7 +21,7 @@ export const controller = {
       sameSite: 'none',
       maxAge: 1000 * 60 * 60 * 24 * 30,
     });
-    res.jsend.success(response.token, 'LOGIN_SUCCESSFUL');
+    res.jsend.success({ token: response.token }, 'LOGIN_SUCCESSFUL');
   }),
 
   refreshToken: catchAsync(async (req, res) => {

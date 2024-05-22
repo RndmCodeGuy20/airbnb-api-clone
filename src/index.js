@@ -1,11 +1,12 @@
 import app from './app';
 import { envConfig } from '#configs/index';
-import { getPGConnection, logger } from '#helpers/index';
+import { getPGConnection, getRedisConnection, logger } from '#helpers/index';
 
 let server;
 
 const init = async () => {
   await getPGConnection();
+  await getRedisConnection();
   server = app.listen(envConfig.PORT, () => {
     logger.log(
         'verbose',

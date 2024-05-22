@@ -29,7 +29,11 @@ class ListingService {
 	 * @return {Promise<{info: {listing_id: *}}>}
 	 */
   async createListing(hostId, data) {
-    // check if host exists and also that user is a host
+    /**
+		 * @constant checkHostQuery
+		 * @description Query to check if the user is a host
+		 * @type {string}
+		 */
     const checkHostQuery = `
 			SELECT email, role_name
 			FROM core_users
@@ -37,30 +41,38 @@ class ListingService {
 			WHERE user_id = $1;
 		`;
 
+    /**
+		 * @constant checkHostResult
+		 * @description Result of the checkHostQuery
+		 * @type {
+		 *   rows: Array<{
+		 *   email: string,
+		 *   role_name: string
+		 * }>;
+		 */
     const checkHostResult = await pgsqlQuery(checkHostQuery, [hostId]);
 
     if (checkHostResult.rows[0].role_name !== 'host') {
-      const setHostRoleQuery = `UPDATE core_users
-																SET role_id =
-																			(SELECT role_id
-																			 FROM core_roles
-																			 WHERE role_name = 'host')
-																WHERE user_id = $1;`;
-
-      await pgsqlQuery(setHostRoleQuery, [hostId]);
+      throw new ListingApiError(
+          'USER_NOT_HOST',
+          'User is not a host',
+          StatusCodes.FORBIDDEN,
+          ERROR_CODES.INVALID,
+      );
     }
 
     // create listing
-    const createListingQuery = `INSERT INTO data_listings(host_id, title,
-																 description,
-																 price_per_night,
-																 address_line_1, address_line_2,
-																 city,
-																 state,
-																 zip_code,
-																 country,
-																 latitude, longitude)
-			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);`;
+    const createListingQuery = `
+						INSERT INTO data_listings(host_id, title,
+						description,
+						price_per_night,
+						address_line_1, address_line_2,
+						city,
+						state,
+						zip_code,
+						country,
+						latitude, longitude)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);`;
 
     const createListingQueryResult = await pgsqlQuery(createListingQuery, [
       hostId,

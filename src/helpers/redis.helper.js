@@ -9,7 +9,12 @@ const TTL = '300';
 const redisUrl = `redis://${envConfig.REDIS.REDIS_HOST}:${envConfig.REDIS.REDIS_PORT}`;
 
 let client;
-async () => {
+
+/**
+ * @description Function to connect to Redis server
+ * @return {Promise<void>}
+ */
+export async function getRedisConnection() {
   try {
     client = createClient({
       url: redisUrl,
@@ -55,7 +60,7 @@ async () => {
     logger.log('error', `Error: ${error}`);
     throw error;
   }
-};
+}
 
 export const redis = {
   get: async (key) => {
@@ -73,6 +78,9 @@ export const redis = {
       await client.set(key, value);
     }
     return true;
+  },
+  incr: async (key) => {
+    return await client.incr(key);
   },
   hget: async (key, field) => {
     const result = await client.hGet(key, field);

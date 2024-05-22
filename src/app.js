@@ -3,7 +3,11 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import { envConfig, pkgConfig } from '#configs/index';
-import { errorMiddleware, morganMiddleware } from '#middlewares/index';
+import {
+  errorMiddleware,
+  morganMiddleware,
+  rateLimiter,
+} from '#middlewares/index';
 import apiRoutes from './api';
 import { jsend } from '#utils/index';
 
@@ -27,13 +31,14 @@ app.use(cookieParser());
 // app.use(loggerMiddleware);
 app.use(morganMiddleware);
 app.use(jsend());
+// app.use(rateLimiter);
 // app.use(appRouter);
 
 app.get('/favicon.ico', (req, res) => {
   res.sendFile('img.png', { root: 'public' });
 });
 
-app.use('/api', apiRoutes);
+app.use('/api', rateLimiter, apiRoutes);
 
 app.get('/', (req, res) => {
   res.jsend.success({
